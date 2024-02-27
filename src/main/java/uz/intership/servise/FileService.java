@@ -9,5 +9,5 @@ import java.io.IOException;
 public interface FileService {
     ResponseDto<String> exelCreate() throws IOException;
 
-    ResponseDto<String> pdfGeneration() throws DocumentException;
+    ResponseDto<String> pdfGeneration() throws DocumentException, FileNotFoundException;
 }

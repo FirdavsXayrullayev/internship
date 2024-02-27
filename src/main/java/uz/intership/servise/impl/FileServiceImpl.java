@@ -1,10 +1,8 @@
 package uz.intership.servise.impl;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +18,11 @@ import uz.intership.repository.ProductRepository;
 import uz.intership.servise.FileService;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,21 +45,16 @@ public class FileServiceImpl implements FileService {
         Set<String> keyid = productData.keySet();
 
         int rowid = 0;
-
         for (String key : keyid) {
-
             row = spreadsheet.createRow(rowid++);
             Object[] objectArr = productData.get(key);
             int cellid = 0;
-
             for (Object obj : objectArr) {
                 Cell cell = row.createCell(cellid++);
                 cell.setCellValue((String)obj);
             }
         }
-
-        FileOutputStream out = new FileOutputStream(
-                new File("C:/Users/User/Desktop/product.xlsx"));
+        FileOutputStream out = new FileOutputStream(filePath("upload_excel", ".xlsx"));
 
         workbook.write(out);
         out.close();
@@ -73,38 +67,48 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseDto<String> pdfGeneration() throws DocumentException {
-        String file
-                = "C:/EXAMPLES/itextExamples/addingTableToPDF.pdf";
+    public ResponseDto<String> pdfGeneration() throws DocumentException, FileNotFoundException {
+        Document document = new Document();
+        PdfWriter.getInstance(document, new FileOutputStream(filePath("upload_pdf", ".pdf")));
 
-        // Step-1 Creating a PdfDocument object
-//        PdfDocument pdfDoc
-//                = new PdfDocument(new PdfWriter(file));
-//
-//        // Step-2 Creating a Document object
-//        Document doc = new Document(pdfDoc);
-//
-//        // Step-3 Creating a table
-//        PdfPTable table = new PdfPTable(2);
-//
-//        // Step-4 Adding cells to the table
-//        table.addCell(new Cell().add("Name"));
-//        table.addCell(new Cell().add("Raju"));
-//        table.addCell(new Cell().add("Id"));
-//        table.addCell(new Cell().add("1001"));
-//        table.addCell(new Cell().add("Designation"));
-//        table.addCell(new Cell().add("Programmer"));
+        document.open();
 
-        // Step-6 Adding Table to document
-//        doc.add(table);
-//
-//        // Step-7 Closing the document
-//        doc.close();
+        PdfPTable table = new PdfPTable(5);
+        Stream.of("Id", "Name", "Price", "Amount", "Description")
+                .forEach(columnTitle -> {
+                    PdfPCell header = new PdfPCell();
+                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                    header.setBorderWidth(2);
+                    header.setPhrase(new Phrase(columnTitle));
+                    table.addCell(header);
+                });
+        List<Product> productList = productRepository.findAll();
+        for (Product product : productList) {
+            table.addCell(String.valueOf(product.getId()));
+            table.addCell(product.getName());
+            table.addCell(String.valueOf(product.getPrice()));
+            table.addCell(String.valueOf(product.getAmount()));
+            table.addCell(product.getDescription());
+        }
+
+        document.add(table);
+        document.close();
+
         return ResponseDto.<String>builder()
                 .code(0)
                 .info("OK")
                 .data("Pdf file is created")
                 .success(true)
-                .build();;
+                .build();
+    }
+    public static String filePath(String folder,String ext){
+        LocalDate localDate = LocalDate.now();
+        String path = localDate.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        java.io.File file = new java.io.File(folder + "/"+ path);
+        if (!file.exists()){
+            file.mkdirs();
+        }
+        String uuid = UUID.randomUUID().toString();
+        return file.getPath() + "\\"+ System.currentTimeMillis() + ext;
     }
 }

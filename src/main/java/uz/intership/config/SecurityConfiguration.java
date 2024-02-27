@@ -1,5 +1,6 @@
 package uz.intership.config;
 
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +16,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import uz.intership.dto.ResponseDto;
 import uz.intership.securityJwt.JwtFilter;
 import uz.intership.servise.UserService;
 import uz.intership.servise.impl.UserServiceImpl;
@@ -30,6 +33,8 @@ import uz.intership.servise.impl.UserServiceImpl;
 public class SecurityConfiguration {
     @Autowired
     private JwtFilter jwtFilter;
+    @Autowired
+    private Gson gson;
 
     @Autowired
 //    @Lazy
