@@ -12,23 +12,25 @@ import uz.intership.servise.UserService;
 @RestController
 @RequestMapping("user")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "Authorization")
+//@SecurityRequirement(name = "Authorization")
 public class UserResources {
     private final UserService userService;
-    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('READ')")
     @GetMapping("get-by-id")
     public ResponseDto<UserDto> getById(@RequestParam Integer id){
-        System.out.println("gettttttttttttttttttttt");
         return userService.getById(id);
     }
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER_ADMIN')")
     @PostMapping("add-new-user")
     public ResponseDto<UserDto> addNewUser(@RequestBody UserDto userDto){
         return userService.addNewUser(userDto);
     }
+    @PreAuthorize("hasAnyAuthority('DELETE')")
     @DeleteMapping("delete-by-id")
     public ResponseDto<UserDto> deleteUserById(@RequestParam Integer id){
         return userService.deleteUserById(id);
     }
+    @PreAuthorize("hasAnyAuthority('UPDATE')")
     @PatchMapping("update")
     public ResponseDto<UserDto> updateUser(@RequestBody UserDto userDto){
         return userService.updateUser(userDto);

@@ -26,7 +26,7 @@ import uz.intership.servise.impl.UserServiceImpl;
 
 @Configuration
 @EnableMethodSecurity
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfiguration {
     @Autowired
     private JwtFilter jwtFilter;
@@ -70,11 +70,12 @@ public class SecurityConfiguration {
                     req.requestMatchers(HttpMethod.POST,"/user/**")
                             .permitAll()
                             .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/swagger-ui.html")
-                            .permitAll();
+                            .permitAll()
 //                            .requestMatchers(HttpMethod.POST,"/user/login")
 //                            .hasAuthority("user")
-//                            .anyRequest()
-//                            .permitAll();
+                            .anyRequest()
+                            .authenticated();
+
 
                 })
                 .csrf(AbstractHttpConfigurer::disable)
