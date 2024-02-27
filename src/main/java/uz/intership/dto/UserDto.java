@@ -16,14 +16,14 @@ import java.util.Collection;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {"password", "role"}, allowSetters = true)
+@JsonIgnoreProperties(value = {"password", "role", "authorities", "username"}, allowSetters = true)
 public class UserDto implements UserDetails {
 
     private Integer id;
     private String firstName;
     private String lastName;
-    private String password;
     private String email;
+    private String password;
     private String role;
 
     @Override
@@ -36,32 +36,32 @@ public class UserDto implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
 
     @Override
     public String getUsername() {
-        return null;
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

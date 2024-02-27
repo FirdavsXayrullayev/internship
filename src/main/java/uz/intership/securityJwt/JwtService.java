@@ -26,6 +26,7 @@ public class JwtService {
     private UserSessionRepo userSessionRepository;
 
     public String createToken(UserDto userDto){
+        System.out.println("Create tokkkkkkkkkkkkkken");
         String uuid = UUID.randomUUID().toString();
         userSessionRepository.save(new UserSession(uuid, gson.toJson(userDto)));
         return Jwts.builder()

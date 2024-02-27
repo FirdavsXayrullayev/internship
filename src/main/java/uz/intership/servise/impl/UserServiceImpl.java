@@ -133,20 +133,20 @@ public class UserServiceImpl implements UserService , UserDetailsService {
         UserDto users = loadUserByUsername(loginDto.getUsername());
         if (!passwordEncoder.matches(loginDto.getPassword(),users.getPassword())){
             return ResponseDto.<String>builder()
-                    .message("Password is not correct"+users.getPassword())
+                    .info("Password is not correct"+users.getPassword())
                     .code(-2)
                     .build();
         }
 
         return ResponseDto.<String>builder()
                 .success(true)
-                .message("OK")
+                .info("OK")
                 .data(jwtService.createToken(users))
                 .build();
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDto loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findFirstByEmail(username);
         if (user.isEmpty()) throw new UsernameNotFoundException("User with email" + username + " is not found");
         return userMapper.toDto(user.get());

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uz.intership.dto.ResponseDto;
 import uz.intership.dto.UserDto;
 import uz.intership.model.User;
 
@@ -30,12 +31,13 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtService.expired(token)){
                 response.getWriter().println(gson.toJson(ResponseDto.builder()
                         .code(-2)
-                        .message("Token is expired!")
+                        .info("Token is expired!")
                         .build()));
                 response.setContentType("application/json");
                 response.setStatus(400);
             }else {
                 UserDto userDto = jwtService.getSubject(token);
+                System.out.println(userDto.getAuthorities());
 
                 UsernamePasswordAuthenticationToken passwordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDto, null, userDto.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(passwordAuthenticationToken);
