@@ -9,25 +9,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Product {
+public class CurrentUserModel {
     @Id
     @GeneratedValue(generator = "productIdSeq")
     @SequenceGenerator(name = "productIdSeq", sequenceName = "product_id_seq")
     private Integer id;
-    private String name;
-    private Integer price;
-    private Integer amount;
-    private String description;
-    private Integer isActive;
-    private Integer createBy;
-    private String createAt;
-    private Integer updateBy;
-    private String updateAt;
+    private String currentUsers;
+    private Integer userId;
 }

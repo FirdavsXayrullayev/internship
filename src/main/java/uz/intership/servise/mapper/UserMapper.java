@@ -29,7 +29,8 @@ public class UserMapper {
                 dto.getLastName(),
                 dto.getEmail(),
                 passwordEncoder.encode(dto.getPassword()),
-                dto.getRole()
+                dto.getRole(),
+                null
         );
     }
 }

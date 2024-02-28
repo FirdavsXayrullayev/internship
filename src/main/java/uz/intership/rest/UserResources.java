@@ -12,7 +12,7 @@ import uz.intership.servise.UserService;
 @RestController
 @RequestMapping("user")
 @RequiredArgsConstructor
-//@SecurityRequirement(name = "Authorization")
+@SecurityRequirement(name = "Authorization")
 public class UserResources {
     private final UserService userService;
     @PreAuthorize("hasAnyAuthority('READ')")

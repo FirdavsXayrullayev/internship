@@ -16,7 +16,7 @@ import java.util.Collection;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {"password", "role", "authorities", "username"}, allowSetters = true)
+@JsonIgnoreProperties(value = {"authorities", "username", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled"}, allowSetters = true)
 public class UserDto implements UserDetails {
 
     private Integer id;

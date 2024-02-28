@@ -1,6 +1,9 @@
 package uz.intership.config;
 
 import com.google.gson.Gson;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +31,10 @@ import uz.intership.servise.UserService;
 import uz.intership.servise.impl.UserServiceImpl;
 
 @Configuration
-@EnableMethodSecurity
+//@EnableMethodSecurity
+@SecurityScheme(name = "Authorization",
+                in = SecuritySchemeIn.HEADER,
+                type = SecuritySchemeType.APIKEY)
 //@EnableWebSecurity
 public class SecurityConfiguration {
     @Autowired

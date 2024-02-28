@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService , UserDetailsService {
 
     @Override
     public ResponseDto<UserDto> getById(Integer id) {
-        return userRepository.findById(id).map(user ->
+        return userRepository.findById(id).filter(p-> p.getIsActive() == 0).map(user ->
                 ResponseDto.<UserDto>builder()
                         .code(0)
                         .info("OK")
@@ -45,12 +45,36 @@ public class UserServiceImpl implements UserService , UserDetailsService {
     @Override
     public ResponseDto<UserDto> addNewUser(UserDto userDto) {
         try {
-            return ResponseDto.<UserDto>builder()
-                    .code(0)
-                    .info("OK")
-                    .success(true)
-                    .data(userMapper.toDto(userRepository.save(userMapper.toEntity(userDto))))
-                    .build();
+            Optional<User> u = userRepository.findFirstByEmail(userDto.getEmail());
+            if (u.isPresent()) {
+                User user = u.get();
+                if (user.getIsActive() == 1) {
+                    user.setIsActive(0);
+                    return ResponseDto.<UserDto>builder()
+                            .code(0)
+                            .info("OK")
+                            .success(true)
+                            .data(userMapper.toDto(userRepository.save(user)))
+                            .build();
+                } else {
+                    return ResponseDto.<UserDto>builder()
+                            .code(-2)
+                            .info("With email already exist")
+                            .success(false)
+                            .data(userDto)
+                            .build();
+                }
+            }else {
+                User user = userMapper.toEntity(userDto);
+                if (user.getRole() == null) user.setRole("USER");
+                user.setIsActive(0);
+                return ResponseDto.<UserDto>builder()
+                        .code(0)
+                        .info("OK")
+                        .success(true)
+                        .data(userMapper.toDto(userRepository.save(user)))
+                        .build();
+            }
         } catch (Exception e) {
             return ResponseDto.<UserDto>builder()
                     .code(1)
@@ -59,18 +83,28 @@ public class UserServiceImpl implements UserService , UserDetailsService {
                     .success(false)
                     .build();
         }
+
     }
 
     @Override
     public ResponseDto<UserDto> deleteUserById(Integer id) {
         return userRepository.findById(id).map(user -> {
-            userRepository.delete(user);
-            return ResponseDto.<UserDto>builder()
-                    .code(0)
-                    .info("OK")
-                    .data(userMapper.toDto(user))
-                    .success(true)
-                    .build();
+            if (user.getIsActive() == 0) {
+                user.setIsActive(1);
+                userRepository.save(user);
+                return ResponseDto.<UserDto>builder()
+                        .code(0)
+                        .info("OK")
+                        .data(userMapper.toDto(user))
+                        .success(true)
+                        .build();
+            }else {
+                return ResponseDto.<UserDto>builder()
+                        .code(-1)
+                        .info("Not found")
+                        .success(false)
+                        .build();
+            }
         }).orElse(
                 ResponseDto.<UserDto>builder()
                         .code(-1)
@@ -100,6 +134,14 @@ public class UserServiceImpl implements UserService , UserDetailsService {
                     .build();
         }
         User user = optionalUserDto.get();
+        if (user.getIsActive() == 1){
+            return ResponseDto.<UserDto>builder()
+                    .code(-1)
+                    .info("Not found")
+                    .success(false)
+                    .data(userDto)
+                    .build();
+        }
         if (userDto.getFirstName() != null){
             user.setFirstName(userDto.getFirstName());
         }

@@ -12,7 +12,12 @@ public class ProductMapper {
                 product.getName(),
                 product.getPrice(),
                 product.getAmount(),
-                product.getDescription()
+                product.getDescription(),
+                product.getCreateBy(),
+                product.getCreateAt(),
+                product.getUpdateBy(),
+                product.getUpdateAt()
+
         );
     }
     public Product toEntity(ProductDto productDto){
@@ -21,7 +26,12 @@ public class ProductMapper {
                 productDto.getName(),
                 productDto.getPrice(),
                 productDto.getAmount(),
-                productDto.getDescription()
+                productDto.getDescription(),
+                null,
+                null,
+                null,
+                null,
+                null
         );
     }
 }

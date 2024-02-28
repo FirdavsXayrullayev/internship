@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,4 +17,8 @@ public class ProductDto {
     private Integer price;
     private Integer amount;
     private String description;
+    private Integer createBy;
+    private String createAt;
+    private Integer updateBy;
+    private String updateAt;
 }

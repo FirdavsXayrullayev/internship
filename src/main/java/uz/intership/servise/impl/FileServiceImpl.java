@@ -19,6 +19,7 @@ import uz.intership.servise.FileService;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
 public class FileServiceImpl implements FileService {
     private final ProductRepository productRepository;
     @Override
-    public ResponseDto<String> exelCreate() throws IOException {
+    public ResponseDto<String> exelCreate(){
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet spreadsheet = workbook.createSheet(" Product Data ");
         XSSFRow row;
@@ -37,9 +38,15 @@ public class FileServiceImpl implements FileService {
         Map<String, Object[]> productData = new TreeMap<String, Object[]>();
 
         List<Product> productList = productRepository.findAll();
-        productData.put("1", new Object[] { "Id", "Name", "Price", "Amount", "Description" });
+        productData.put("1", new Object[] { "Id", "Name", "Price", "Amount", "Description", "isActive", "createBy", "createAt", "updateBy", "updateAt"});
         for (int i = 0; i < productList.size(); i++){
-            productData.put(String.valueOf(i+2), new Object[] { String.valueOf(productList.get(i).getId()), productList.get(i).getName(), String.valueOf(productList.get(i).getPrice()),String.valueOf(productList.get(i).getAmount()),productList.get(i).getDescription() });
+            productData.put(String.valueOf(i+2),
+                    new Object[] { String.valueOf(productList.get(i).getId()), productList.get(i).getName(), String.valueOf(productList.get(i).getPrice()),
+                            String.valueOf(productList.get(i).getAmount()),productList.get(i).getDescription(),String.valueOf(productList.get(i).getIsActive()),
+                            String.valueOf(productList.get(i).getCreateBy()),String.valueOf(productList.get(i).getCreateAt()),
+                            String.valueOf(productList.get(i).getUpdateBy()),String.valueOf(productList.get(i).getUpdateAt())
+
+            });
         }
 
         Set<String> keyid = productData.keySet();
@@ -54,10 +61,21 @@ public class FileServiceImpl implements FileService {
                 cell.setCellValue((String)obj);
             }
         }
-        FileOutputStream out = new FileOutputStream(filePath("upload_excel", ".xlsx"));
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(filePath("upload_excel", ".xlsx"));
+            workbook.write(out);
+            out.close();
+        } catch (IOException e) {
+            return ResponseDto.<String>builder()
+                    .code(-2)
+                    .info("Error with " + e.getMessage())
+                    .data("Excel file is not created")
+                    .success(false)
+                    .build();
+        }
 
-        workbook.write(out);
-        out.close();
+
         return ResponseDto.<String>builder()
                 .code(0)
                 .info("OK")
@@ -67,32 +85,45 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseDto<String> pdfGeneration() throws DocumentException, FileNotFoundException {
+    public ResponseDto<String> pdfGeneration(){
         Document document = new Document();
-        PdfWriter.getInstance(document, new FileOutputStream(filePath("upload_pdf", ".pdf")));
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(filePath("upload_pdf", ".pdf")));
+            document.open();
 
-        document.open();
+            PdfPTable table = new PdfPTable(10);
+            Stream.of("Id", "Name", "Price", "Amount", "Description", "IsActive", "CreateBy", "CreateAt", "UpdateBy", "UpdateAt")
+                    .forEach(columnTitle -> {
+                        PdfPCell header = new PdfPCell();
+                        header.setBackgroundColor(BaseColor.GREEN);
+                        header.setPhrase(new Phrase(columnTitle));
+                        table.addCell(header);
+                    });
+            List<Product> productList = productRepository.findAll();
+            for (Product product : productList) {
+                table.addCell(String.valueOf(product.getId()));
+                table.addCell(product.getName());
+                table.addCell(String.valueOf(product.getPrice()));
+                table.addCell(String.valueOf(product.getAmount()));
+                table.addCell(product.getDescription());
+                table.addCell(String.valueOf(product.getIsActive()));
+                table.addCell(String.valueOf(product.getCreateBy()));
+                table.addCell(String.valueOf(product.getCreateAt()));
+                table.addCell(String.valueOf(product.getUpdateBy()));
+                table.addCell(String.valueOf(product.getUpdateAt()));
+            }
 
-        PdfPTable table = new PdfPTable(5);
-        Stream.of("Id", "Name", "Price", "Amount", "Description")
-                .forEach(columnTitle -> {
-                    PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setBorderWidth(2);
-                    header.setPhrase(new Phrase(columnTitle));
-                    table.addCell(header);
-                });
-        List<Product> productList = productRepository.findAll();
-        for (Product product : productList) {
-            table.addCell(String.valueOf(product.getId()));
-            table.addCell(product.getName());
-            table.addCell(String.valueOf(product.getPrice()));
-            table.addCell(String.valueOf(product.getAmount()));
-            table.addCell(product.getDescription());
+            document.add(table);
+            document.close();
+        } catch (DocumentException | FileNotFoundException e) {
+            return ResponseDto.<String>builder()
+                    .code(-2)
+                    .info("Error with " + e.getMessage())
+                    .data("Pdf file is not created")
+                    .success(false)
+                    .build();
         }
 
-        document.add(table);
-        document.close();
 
         return ResponseDto.<String>builder()
                 .code(0)
